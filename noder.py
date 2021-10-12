@@ -7,15 +7,20 @@ class ReprLikeStr:
 
 class Tag(ReprLikeStr):
 
-    def __init__(self, text: str) -> None:
+    def __init__(self, text: str, node = None) -> None:
         self.text: str = text
-        self.params = None
+        self.node = node
+
+    @property
+    def params(self):
+        return self.node.params if self.node else None
 
     def __str__(self) -> str:
-        if self.params == None:
+        params = self.params
+        if params == None:
             return '[ {} ]'.format(self.text)
         else:
-            return '[ {} {} ]'.format(self.text, self.params)
+            return '[ {} {} ]'.format(self.text, params)
 
 
 class Node(ReprLikeStr):
@@ -26,10 +31,13 @@ class Node(ReprLikeStr):
         self.children = []
         self.tag = tag
         self.tag_end = tag_end
+        self.params = None
+        self.text = None
 
     def __str__(self) -> str:
         pre = '  ' * self.level
-        s = '{}{}'.format(pre, self.tag)
+        text = self.text if self.text else ''
+        s = '{}{}{}'.format(pre, self.tag, text)
         if self.tag_end:
             s += str(self.tag_end)
         lst = [s]
@@ -49,14 +57,32 @@ class NodeParser:
             i, j, is_start, is_full = self.find_tag(text, pos)
             if i < 0:
                 break
+            
+            pre_text = None
+            if i > pos:
+                pre_text = text[pos:i]
+                if pre_text.isspace():
+                    pre_text = None
+
             tag = Tag(text[i+1:j])
             if is_start:
-                params_parser.parse(tag)
+                if pre_text:
+                    p, pend = Tag('p'), Tag('/p')
+                    pnode = Node(cur_node, p, pend)
+                    p.node = p.pend = pnode
+                    pnode.text = pre_text
+                    cur_node.children.append(pnode)
+
                 node = Node(cur_node, tag)
+                params_parser.parse(tag, node)
+                tag.node = node
                 cur_node.children.append(node)
                 if not is_full:
                     cur_node = node
             else:
+                if pre_text:
+                    cur_node.text = pre_text
+
                 cur_node.tag_end = tag
                 cur_node = cur_node.parent
             pos = j + 1
@@ -86,7 +112,7 @@ class NodeParser:
 
 class ParamsParser:
 
-    def parse(self, tag: Tag):
+    def parse(self, tag: Tag, node: Node):
         text = tag.text
         while '  ' in text:
             text = text.replace('  ', ' ')
@@ -103,7 +129,7 @@ class ParamsParser:
             else:
                 params[li] = True
         if params:
-            tag.params = params
+            node.params = params
 
 
 def noder(path):

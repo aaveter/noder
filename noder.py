@@ -36,7 +36,9 @@ class Node(ReprLikeStr):
 
     def __str__(self) -> str:
         pre = '  ' * self.level
-        text = self.text if self.text else ''
+        text = self.text.replace('\n', ' ').strip() if self.text else ''
+        if len(text) > 30:
+            text = text[:27] + '...'
         s = '{}{}{}'.format(pre, self.tag, text)
         if self.tag_end:
             s += str(self.tag_end)
@@ -132,10 +134,14 @@ class ParamsParser:
             node.params = params
 
 
-def noder(path):
+def noder_parse_file(path):
     text = open(path, encoding='utf-8').read()
-
     root = NodeParser().run(text)
+    return root
+
+
+def noder(path):
+    root = noder_parse_file(path)
     for node in root.children:
         print(node)
 

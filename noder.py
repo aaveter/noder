@@ -1,4 +1,7 @@
 
+from styler import Style
+
+
 class ReprLikeStr:
 
     def __repr__(self) -> str:
@@ -12,15 +15,15 @@ class Tag(ReprLikeStr):
         self.node = node
 
     @property
-    def params(self):
-        return self.node.params if self.node else None
+    def attrs(self):
+        return self.node.attrs if self.node else None
 
     def __str__(self) -> str:
-        params = self.params
-        if params == None:
+        attrs = self.attrs
+        if attrs == None:
             return '[ {} ]'.format(self.text)
         else:
-            return '[ {} {} ]'.format(self.text, params)
+            return '[ {} {} ]'.format(self.text, attrs)
 
 
 class Node(ReprLikeStr):
@@ -31,7 +34,7 @@ class Node(ReprLikeStr):
         self.children = []
         self.tag = tag
         self.tag_end = tag_end
-        self.params = None
+        self.attrs = None
         self.text = None
 
     def __str__(self) -> str:
@@ -53,7 +56,8 @@ class NodeParser:
     def run(self, text: str):
         pos = 0
         root = cur_node = Node(None, None)
-        params_parser = ParamsParser()
+        style = Style()
+        attrs_parser = AttrsParser()
 
         while True:
             i, j, is_start, is_full = self.find_tag(text, pos)
@@ -76,7 +80,8 @@ class NodeParser:
                     cur_node.children.append(pnode)
 
                 node = Node(cur_node, tag)
-                params_parser.parse(tag, node)
+                attrs_parser.parse(tag, node)
+                style.connect_styles_to_node(node)
                 tag.node = node
                 cur_node.children.append(node)
                 if not is_full:
@@ -84,6 +89,8 @@ class NodeParser:
             else:
                 if pre_text:
                     cur_node.text = pre_text
+                    if cur_node.tag.text == 'style':
+                        style.add_by_text(pre_text)
 
                 cur_node.tag_end = tag
                 cur_node = cur_node.parent
@@ -112,26 +119,49 @@ class NodeParser:
         return text.find(">", pos)
 
 
-class ParamsParser:
+class AttrsParser:
 
     def parse(self, tag: Tag, node: Node):
         text = tag.text
         while '  ' in text:
             text = text.replace('  ', ' ')
-        lst = text.split(' ')
-        tag.text = lst[0]
-        params = {}
-        for li in lst[1:]:
-            if '=' in li:
-                lst2 = li.split('=')
-                value = lst2[1]
-                if value.startswith('"') or value.startswith("'"):
-                    value = value[1:-1]
-                params[lst2[0]] = value
+
+        tag.text = text.split(' ')[0]
+
+        attrs = {}
+        lst = text.split('=')
+        ln = len(lst)
+        for i in range(0, ln-1):
+            a, b = lst[i:i+2]
+            key = a.split(' ')[-1].strip()
+            bb = b.split(' ')
+            if i < ln-2:
+                bb = bb[:-1]
+            value = ' '.join(bb).strip()
+            if value.startswith('"') or value.startswith("'"):
+                value = value[1:-1]
+            if key == 'class':
+                attrs['classList'] = [a for a in value.split(' ') if len(a) > 0]
             else:
-                params[li] = True
-        if params:
-            node.params = params
+                attrs[key] = value
+
+        # lst = text.split(' ')
+        # tag.text = lst[0]
+        # attrs = {}
+        # for li in lst[1:]:
+        #     if '=' in li:
+        #         lst2 = li.split('=')
+        #         key, value = lst2[0].strip(), lst2[1].strip()
+        #         if value.startswith('"') or value.startswith("'"):
+        #             value = value[1:-1]
+        #         if key == 'class':
+        #             attrs['classList'] = [a for a in value.split(' ') if len(a) > 0]
+        #         else:
+        #             attrs[key] = value
+        #     else:
+        #         attrs[li] = True
+        if attrs:
+            node.attrs = attrs
 
 
 def noder_parse_file(path):

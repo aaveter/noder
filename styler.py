@@ -50,6 +50,12 @@ class Style:
         print('>>> classes', classes)
 
         style = {}
+        if tag:
+            if tag == 'h1':
+                style['font-size'] = 32
+            elif tag == 'h2':
+                style['font-size'] = 24
+
         names = ([tag] if tag else []) + ([('.' + _cl) for _cl in classes] if classes else [])
         for n in names:
             _style = self.styles.get(n, None)

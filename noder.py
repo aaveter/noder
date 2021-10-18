@@ -72,20 +72,16 @@ class NodeParser:
 
             tag = Tag(text[i+1:j])
             if is_start:
+
                 if pre_text:
                     p, pend = Tag('p'), Tag('/p')
-                    pnode = Node(cur_node, p, pend)
-                    p.node = p.pend = pnode
+                    pnode = self.add_node(cur_node, p, pend, attrs_parser, style)
                     pnode.text = pre_text
-                    cur_node.children.append(pnode)
 
-                node = Node(cur_node, tag)
-                attrs_parser.parse(tag, node)
-                style.connect_styles_to_node(node)
-                tag.node = node
-                cur_node.children.append(node)
+                node = self.add_node(cur_node, tag, None, attrs_parser, style)
                 if not is_full:
                     cur_node = node
+
             else:
                 if pre_text:
                     cur_node.text = pre_text
@@ -97,6 +93,16 @@ class NodeParser:
             pos = j + 1
 
         return root
+
+    def add_node(self, cur_node, tag, tag_end, attrs_parser, style):
+        node = Node(cur_node, tag, tag_end)
+        attrs_parser.parse(tag, node)
+        style.connect_styles_to_node(node)
+        tag.node = node
+        if tag_end:
+            tag_end.node = node
+        cur_node.children.append(node)
+        return node
 
     def find_tag(self, text: str, pos: int):
         i = self.find_tag_start(text, pos)
@@ -145,21 +151,6 @@ class AttrsParser:
             else:
                 attrs[key] = value
 
-        # lst = text.split(' ')
-        # tag.text = lst[0]
-        # attrs = {}
-        # for li in lst[1:]:
-        #     if '=' in li:
-        #         lst2 = li.split('=')
-        #         key, value = lst2[0].strip(), lst2[1].strip()
-        #         if value.startswith('"') or value.startswith("'"):
-        #             value = value[1:-1]
-        #         if key == 'class':
-        #             attrs['classList'] = [a for a in value.split(' ') if len(a) > 0]
-        #         else:
-        #             attrs[key] = value
-        #     else:
-        #         attrs[li] = True
         if attrs:
             node.attrs = attrs
 

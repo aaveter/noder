@@ -69,6 +69,8 @@ class NodeParser:
                 pre_text = text[pos:i]
                 if pre_text.isspace():
                     pre_text = None
+                else:
+                    pre_text = pre_text.strip()
 
             tag = Tag(text[i+1:j])
             if is_start:

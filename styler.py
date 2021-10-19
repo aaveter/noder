@@ -39,7 +39,12 @@ class Style:
             ll = a.split(':')
             key, value = ll[0].strip(), ll[1].strip()
             if key in ('width', 'height', 'margin'):
-                value = int(value)
+                if value.endswith('%'):
+                    value = (int(value[:-1]), '%')
+                else:
+                    if value.endswith('px'):
+                        value = value[:-2]
+                    value = int(value)
             _style[key] = value
 
         return _style

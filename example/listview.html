@@ -24,18 +24,23 @@
                 margin: 10px;
                 border: 1px solid #cccccc;
             }
+            .item {
+                margin: 5px;
+                border: 1px solid #cccccc;
+                height: 20px;
+            }
         </style>
     </head>
     <body>
         <div class='yellow'><h1>Hello, Listview!</h1></div>
         <listview class="page green">
             <template>
-                <item class='page-content yellow'>
-                    item
+                <item class='item yellow'>
+                    item {{ counter }}
                 </item>
             </template>
             <items>
-                <item class='page-content yellow'>
+                <item class='item yellow'>
                     item
                 </item>
             </items>

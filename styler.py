@@ -15,17 +15,19 @@ class Style:
             if j < 0:
                 break
 
-            name = text[pos:i].strip()
+            names = text[pos:i].strip()
             inside = text[i+1:j].strip()
 
             _style = self.parse_style(inside)
 
-            if name not in self.styles:
-                self.styles[name] = {}
-            name_d = self.styles[name]
-            name_d.update(_style)
+            for name in names.split(','):
+                name = name.strip()
+                if name not in self.styles:
+                    self.styles[name] = {}
+                name_d = self.styles[name]
+                name_d.update(_style)
 
-            print('''    {} -> {}'''.format(name, _style))
+                print('''    {} -> {}'''.format(name, _style))
 
             pos = j+1
 

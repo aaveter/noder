@@ -54,7 +54,8 @@ class Style:
     def connect_styles_to_node(self, node):
         tag = node.tag.text if node.tag else None
         classes = node.attrs.get('classList', None) if node.attrs else None
-        print('>>> classes', classes)
+        if classes:
+            print('>>> classes', classes)
 
         style = {}
         if tag:
@@ -70,4 +71,5 @@ class Style:
                 style.update(_style)
 
         node.style = style
-        print(':::', node, style)
+        if style:
+            print(':::', node, style)

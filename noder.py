@@ -58,6 +58,19 @@ class Node(ReprLikeStr):
             if _n:
                 return _n
 
+    def set_node(self, node):
+        self.children = node.children
+        self.tag = node.tag
+        self.tag_end = node.tag_end
+        self.attrs = node.attrs
+        self.text = node.text
+        self._update_childs_level(self.level+1)
+
+    def _update_childs_level(self, level):
+        for ch in self.children:
+            ch.level = level
+            ch._update_childs_level(level+1)
+
 
 class NodeParser:
 
@@ -143,6 +156,8 @@ class AttrsParser:
             text = text.replace('  ', ' ')
 
         tag.text = text.split(' ')[0]
+        if text.endswith('/'):
+            text = text[:-1]
 
         attrs = {}
         lst = text.split('=')

@@ -1,6 +1,6 @@
 
 
-class Style:
+class Styler:
 
     def __init__(self) -> None:
         self.styles = {}

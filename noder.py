@@ -1,5 +1,5 @@
 
-from styler import Style
+from styler import Styler
 
 
 class ReprLikeStr:
@@ -45,6 +45,8 @@ class Node(ReprLikeStr):
         s = '{}{}{}'.format(pre, self.tag, text)
         if self.tag_end:
             s += str(self.tag_end)
+        s += (' - {} ({})'.format(self.level, id(self)))
+
         lst = [s]
         for node in self.children:
             lst.append(str(node))
@@ -59,6 +61,7 @@ class Node(ReprLikeStr):
                 return _n
 
     def set_node(self, node):
+        print('set_node TO ({} <- {}):'.format(id(self), id(node)), node)
         self.children = node.children
         self.tag = node.tag
         self.tag_end = node.tag_end
@@ -77,7 +80,7 @@ class NodeParser:
     def run(self, text: str):
         pos = 0
         root = cur_node = Node(None, None)
-        style = Style()
+        styler = root.styler = Styler()
         attrs_parser = AttrsParser()
 
         while True:
@@ -98,10 +101,10 @@ class NodeParser:
 
                 if pre_text:
                     p, pend = Tag('p'), Tag('/p')
-                    pnode = self.add_node(cur_node, p, pend, attrs_parser, style)
+                    pnode = self.add_node(cur_node, p, pend, attrs_parser, styler)
                     pnode.text = pre_text
 
-                node = self.add_node(cur_node, tag, None, attrs_parser, style)
+                node = self.add_node(cur_node, tag, None, attrs_parser, styler)
                 if not is_full:
                     cur_node = node
 
@@ -109,7 +112,7 @@ class NodeParser:
                 if pre_text:
                     cur_node.text = pre_text
                     if cur_node.tag.text == 'style':
-                        style.add_by_text(pre_text)
+                        styler.add_by_text(pre_text)
 
                 cur_node.tag_end = tag
                 cur_node = cur_node.parent
@@ -117,10 +120,10 @@ class NodeParser:
 
         return root
 
-    def add_node(self, cur_node, tag, tag_end, attrs_parser, style):
+    def add_node(self, cur_node, tag, tag_end, attrs_parser, styler):
         node = Node(cur_node, tag, tag_end)
         attrs_parser.parse(tag, node)
-        style.connect_styles_to_node(node)
+        styler.connect_styles_to_node(node)
         tag.node = node
         if tag_end:
             tag_end.node = node

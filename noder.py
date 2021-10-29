@@ -50,6 +50,14 @@ class Node(ReprLikeStr):
             lst.append(str(node))
         return '\n'.join(lst)
 
+    def getElementById(self, key):
+        for n in self.children:
+            if n.attrs and n.attrs.get('id', None) == key:
+                return n
+            _n = n.getElementById(key)
+            if _n:
+                return _n
+
 
 class NodeParser:
 
@@ -159,6 +167,11 @@ class AttrsParser:
 
 def noder_parse_file(path):
     text = open(path, encoding='utf-8').read()
+    root = noder_parse_text(text)
+    return root
+
+
+def noder_parse_text(text):
     root = NodeParser().run(text)
     return root
 

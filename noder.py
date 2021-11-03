@@ -69,10 +69,22 @@ class Node(ReprLikeStr):
         self.text = node.text
         self._update_childs_level(self.level+1)
 
-    def _update_childs_level(self, level):
+    def _update_childs_level(self, level, update_parent=False):
         for ch in self.children:
             ch.level = level
             ch._update_childs_level(level+1)
+            if update_parent:
+                ch.parent = self
+
+    @property
+    def innerHTML(self):
+        pass
+
+    @innerHTML.setter
+    def innerHTML(self, text):
+        node = noder_parse_text(text)
+        self.children = node.children
+        self._update_childs_level(self.level+1)
 
 
 class NodeParser:

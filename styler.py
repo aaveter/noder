@@ -46,7 +46,11 @@ class Styler:
                 else:
                     if value.endswith('px'):
                         value = value[:-2]
-                    value = int(value)
+                    if value.isnumeric():
+                        value = int(value)
+                    else:
+                        print('!!!', value)
+                        value = 0
             _style[key] = value
 
         return _style

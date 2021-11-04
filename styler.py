@@ -40,7 +40,7 @@ class Styler:
                 continue
             ll = a.split(':')
             key, value = ll[0].strip(), ll[1].strip()
-            if key in ('width', 'height', 'margin', 'min-height'):
+            if key in ('width', 'height', 'min-height', 'margin', 'padding'):
                 if value.endswith('%'):
                     value = (int(value[:-1]), '%')
                 else:
@@ -51,6 +51,18 @@ class Styler:
                     else:
                         print('!!!', value)
                         value = 0
+            elif key == 'border':
+                _lst = value.split(' ')
+                if len(_lst) != 3:
+                    value = None
+                else: 
+                    if _lst[0].endswith('px'):
+                        _lst[0] = _lst[0][:-2]
+                    if _lst[0].isnumeric():
+                        value = (int(_lst[0]), _lst[1], _lst[2])
+                    else:
+                        print('!!!', _lst)
+                        value = None
             _style[key] = value
 
         return _style

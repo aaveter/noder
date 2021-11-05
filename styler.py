@@ -46,11 +46,8 @@ class Styler:
                 else:
                     if value.endswith('px'):
                         value = value[:-2]
-                    if value.isnumeric():
-                        value = int(value)
-                    else:
-                        print('!!!', value)
-                        value = 0
+                    value = str2int(value)
+
             elif key == 'border':
                 _lst = value.split(' ')
                 if len(_lst) != 3:
@@ -63,6 +60,10 @@ class Styler:
                     else:
                         print('!!!', _lst)
                         value = None
+
+            elif key == 'flex':
+                value = str2int(value)
+
             _style[key] = value
 
         return _style
@@ -89,3 +90,11 @@ class Styler:
         node.style = style
         if style:
             print(':::', node, style)
+
+
+def str2int(value):
+    if value.isnumeric():
+        return int(value)
+    else:
+        print('!!!', value)
+        return 0

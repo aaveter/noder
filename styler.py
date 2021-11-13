@@ -48,7 +48,7 @@ class Styler:
                         value = value[:-2]
                     value = str2int(value)
 
-            elif key == 'border':
+            elif key in ('border', 'border-right', 'border-left', 'border-top', 'border-bottom'):
                 _lst = value.split(' ')
                 if len(_lst) != 3:
                     value = None
